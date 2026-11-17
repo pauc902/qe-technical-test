@@ -7,6 +7,7 @@ import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Tracing;
+import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -52,6 +53,9 @@ public abstract class UiTestBase {
         browser = browserType().launch(new BrowserType.LaunchOptions()
                 .setHeadless(TestConfig.getBoolean("ui.headless"))
                 .setSlowMo(TestConfig.getInt("ui.slowMoMs")));
+        // assertThat(...) checks have their own 5-second limit, separate from the action timeouts set below.
+        // The shared demo site can take several seconds to respond, so give the checks the same allowance.
+        PlaywrightAssertions.setDefaultAssertionTimeout(TestConfig.getInt("ui.timeoutMs"));
     }
 
     @BeforeEach
