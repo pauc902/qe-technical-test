@@ -19,6 +19,7 @@
         <!-- Library versions in one place, so each can be changed in a single line -->
         <playwright.version>1.64.0</playwright.version>
         <junit.version>5.11.3</junit.version>
+        <junit.platform.version>1.11.3</junit.platform.version>
         <assertj.version>3.26.3</assertj.version>
         <jackson.version>2.18.1</jackson.version>
     </properties>
@@ -38,6 +39,14 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JUnit launcher API: lets our results-table listener hook into the test run -->
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>${junit.platform.version}</version>
             <scope>test</scope>
         </dependency>
 

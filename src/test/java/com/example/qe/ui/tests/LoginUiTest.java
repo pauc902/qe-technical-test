@@ -1,11 +1,13 @@
 package com.example.qe.ui.tests;
 
 import com.example.qe.config.TestConfig;
+import com.example.qe.reporting.Area;
 import com.example.qe.ui.pages.DashboardPage;
 import com.example.qe.ui.pages.LoginPage;
 import com.example.qe.ui.support.UiTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -34,6 +36,8 @@ class LoginUiTest extends UiTestBase {
     }
 
     @Test
+    @Tag("positive")
+    @Area("Login & session")
     @DisplayName("valid credentials land on the dashboard; logging out ends the session")
     void validLoginThenLogout() {
         DashboardPage dashboard = loginPage.loginAs(
@@ -50,6 +54,8 @@ class LoginUiTest extends UiTestBase {
         assertThat(page).hasURL(LOGIN_URL);
     }
 
+    @Tag("negative")
+    @Area("Authentication")
     @ParameterizedTest(name = "[{index}] {0}")
     @DisplayName("rejected credentials show 'Invalid credentials' and stay on the login page")
     @CsvSource(delimiter = '|', quoteCharacter = '"', textBlock = """
@@ -68,6 +74,8 @@ class LoginUiTest extends UiTestBase {
         assertThat(loginPage.errorAlert()).not().containsText("password");
     }
 
+    @Tag("negative")
+    @Area("Form validation")
     @ParameterizedTest(name = "[{index}] {0}")
     @DisplayName("missing fields show 'Required' under exactly the empty fields")
     @CsvSource(delimiter = '|', nullValues = "<empty>", textBlock = """

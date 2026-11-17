@@ -4,10 +4,12 @@ import com.example.qe.api.client.ApiResult;
 import com.example.qe.api.client.PetApiClient;
 import com.example.qe.api.model.ApiError;
 import com.example.qe.api.model.Pet;
+import com.example.qe.reporting.Area;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -39,6 +41,8 @@ class GetPetByIdApiTest extends ApiTestBase {
     }
 
     @Test
+    @Tag("positive")
+    @Area("Retrieve pet")
     @DisplayName("returns 200 and the full pet record for an existing id")
     void returnsExistingPet() {
         // Set up: create a pet that we own
@@ -55,6 +59,8 @@ class GetPetByIdApiTest extends ApiTestBase {
         assertThat(response.as(Pet.class)).usingRecursiveComparison().isEqualTo(expected);
     }
 
+    @Tag("negative")
+    @Area("Not-found handling")
     @ParameterizedTest(name = "id={0} -> 404 Pet not found")
     @DisplayName("returns 404 'Pet not found' for well-formed ids that do not exist")
     @ValueSource(strings = {"0", "-1", "9223372036854775807" /* the largest valid id */})
@@ -67,6 +73,8 @@ class GetPetByIdApiTest extends ApiTestBase {
         assertThat(error.message()).isEqualTo("Pet not found");
     }
 
+    @Tag("negative")
+    @Area("Input validation")
     @ParameterizedTest(name = "id={0} -> rejected as a client error")
     @DisplayName("rejects malformed ids with a 4xx, never a 5xx")
     @ValueSource(strings = {"abc", "1.5", "null", "9223372036854775808" /* one more than the largest id */})
@@ -79,6 +87,9 @@ class GetPetByIdApiTest extends ApiTestBase {
 
     @Disabled("KNOWN DEFECT: the spec says 400 'Invalid ID supplied', but the API returns 404 and leaks "
             + "a java.lang.NumberFormatException message. Re-enable once it is fixed.")
+    @Tag("negative")
+    @Tag("known-defect")
+    @Area("API contract")
     @ParameterizedTest(name = "id={0} -> 400 per the API contract")
     @DisplayName("returns exactly 400 for malformed ids, without leaking internals")
     @ValueSource(strings = {"abc", "1.5"})
