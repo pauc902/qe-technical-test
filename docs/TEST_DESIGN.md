@@ -91,26 +91,27 @@ depth.
 
 ### 4.1 Petstore API
 
-| P | Scenario | Why |
-|---|---|---|
-| 1 | **User** flow: create, login, get, update, delete. Negative: wrong password, duplicate username. | Completes the core, and it handles credentials |
-| 2 | **Store** flow: place an order, get it, delete it. Negative: unknown order, order for a pet that does not exist. | Completes the core. A business flow across two resources. |
-| 3 | **Pet depth:** invalid bodies on create, `PUT` and `DELETE` lifecycle, `findByStatus` | The pet resource goes deeper once every resource has a flow |
-| 4 | **Security checks:** no internal errors or stack traces in responses, injection-style input, authorisation on write endpoints | The defect in section 5 shows this is a real risk |
-| 5 | **Response-time indicator** | Recorded and flagged, never a pass/fail gate. The server is shared and its timing varies, so a hard limit would make the suite flaky. |
+| P | Scenario | Type | Why |
+|---|---|---|---|
+| 1 | **User** flow: create, login, get, update, delete. Negative: wrong password, duplicate username. | Positive and negative | Completes the core, and it handles credentials |
+| 2 | **Store** flow: place an order, get it, delete it. Negative: unknown order, order for a pet that does not exist. | Positive and negative | Completes the core. A business flow across two resources. |
+| 3 | **Pet depth:** invalid bodies on create, `PUT` and `DELETE` lifecycle, `findByStatus` | Positive and negative | The pet resource goes deeper once every resource has a flow |
+| 4 | **Security checks:** no internal errors or stack traces in responses, injection-style input, authorisation on write endpoints | Negative | The defect in section 5 shows this is a real risk |
+| 5 | **Response-time indicator** | Positive | Recorded and flagged, never a pass/fail gate. The server is shared and its timing varies, so a hard limit would make the suite flaky. |
 
 ### 4.2 OrangeHRM UI
 
-| P | Scenario | Why |
-|---|---|---|
-| 1 | **Session handling:** an expired or cleared session goes to login, and the back button after logout shows no data. Expiry is simulated, not waited for. | Highest impact, and cheap to run reliably |
-| 2 | **Dashboard smoke test with an accessibility scan** | One quick check that the whole application loads |
-| 3 | **Role-based access:** a basic employee cannot reach admin or HR pages, by menu or by direct address | Exposure of people's data. The user is created through the API where possible. |
-| 4 | **Add employee, then find them in the list** (see section 3) | The core HR journey |
-| 5 | **List search and filter**, including a "no records" result | The most-used admin feature |
-| Last | **Visual snapshot** with dynamic areas masked | Highest upkeep. The dashboard shows live data, and rendering differs between machines. |
+| P | Scenario | Type | Why |
+|---|---|---|---|
+| 1 | **Session handling:** an expired or cleared session goes to login, and the back button after logout shows no data. Expiry is simulated, not waited for. | Negative | Highest impact, and cheap to run reliably |
+| 2 | **Dashboard smoke test with an accessibility scan** | Positive | One quick check that the whole application loads |
+| 3 | **Role-based access:** a basic employee cannot reach admin or HR pages, by menu or by direct address | Negative | Exposure of people's data. The user is created through the API where possible. |
+| 4 | **Add employee, then find them in the list** (see section 3). Negative: required names, duplicate employee ID. | Positive and negative | The core HR journey |
+| 5 | **List search and filter**, including a "no records" result | Positive and negative | The most-used admin feature |
+| Last | **Visual snapshot** with dynamic areas masked | Positive | Highest upkeep. The dashboard shows live data, and rendering differs between machines. |
 
-**Accessibility (WCAG 2.2 AA) applies throughout,** so every page the UI tests visit gets an automated scan.
+**Accessibility (WCAG 2.2 AA) should apply throughout,** so every page the UI tests visit would get an automated scan.
+This is not built yet: it is the first thing I would add to the existing login test.
 Automated tools find only part of the issues (the GDS Way puts it at about 30%), so manual checks and
 assistive-technology testing are also needed.
 
@@ -124,7 +125,23 @@ assistive-technology testing are also needed.
    the fields cannot be found by label. That is probably an accessibility failure and is worth a full scan.
    It is also why the tests locate the fields by placeholder.
 
-## 6. Trade-offs
+## 6. Challenges and how I addressed them
+
+- **A login test failed intermittently.** The failure evidence showed a blank page, and the trace showed the
+  demo server taking about four seconds to reject the login and redisplay the page. Playwright's `assertThat`
+  checks have their own five-second limit, separate from the timeout I had configured for actions, so the check
+  gave up first. I made the checks use the same configured timeout. I did not add a retry, because that would
+  have hidden the slow responses rather than fixed the cause.
+- **The API did not match its own specification** for malformed ids (section 5). I kept the strict contract
+  check as a disabled test with the reason, and added a robust check that passes today: bad input must give a
+  client error, never a server error.
+- **The login fields could not be found by label** (section 5), so they are located by placeholder, and the
+  finding is recorded for an accessibility scan.
+- **Checking stability.** Before relying on the tests in a demonstration, I ran the not-found API test 10 times
+  and the create-then-get test 20 times. All runs passed, so I did not add retries. This shows the tests are
+  stable now; it cannot prove they will never fail on a shared public server.
+
+## 7. Trade-offs
 
 - **Shared public systems.** Anyone can change or reset the Petstore and the OrangeHRM demo at any time.
   Tests create and delete their own data and do not depend on global state. A real team would use a
@@ -136,7 +153,7 @@ assistive-technology testing are also needed.
   They are marked and kept in the page objects, so a change is a one-line fix.
 - **Not built in the time box:** the further scenarios in section 4, and reuse of a saved login session.
 
-## 7. Practices followed from the GDS Way
+## 8. Practices followed from the GDS Way
 
 - A README written for a newcomer, with detail moved into `docs/`
 - Commit messages that explain why a change was made

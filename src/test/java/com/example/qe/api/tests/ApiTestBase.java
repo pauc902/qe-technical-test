@@ -1,5 +1,6 @@
 package com.example.qe.api.tests;
 
+import com.example.qe.config.TestConfig;
 import com.microsoft.playwright.APIRequest;
 import com.microsoft.playwright.APIRequestContext;
 import com.microsoft.playwright.Playwright;
@@ -12,13 +13,11 @@ import java.util.Map;
 
 /**
  * Sets up and tears down the Playwright connection used by every API test class.
- * The base URL can be overridden on the command line: mvn test -Dpetstore.baseUrl=...
+ * The Petstore address comes from the petstore.baseUrl setting (see config.properties).
  */
 @Tag("api")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class ApiTestBase {
-
-    private static final String BASE_URL = System.getProperty("petstore.baseUrl", "https://petstore.swagger.io/v2/");
 
     private Playwright playwright;
     protected APIRequestContext request;
@@ -29,7 +28,7 @@ public abstract class ApiTestBase {
         playwright = Playwright.create(new Playwright.CreateOptions()
                 .setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
         request = playwright.request().newContext(new APIRequest.NewContextOptions()
-                .setBaseURL(BASE_URL)
+                .setBaseURL(TestConfig.get("petstore.baseUrl"))
                 .setExtraHTTPHeaders(Map.of("Accept", "application/json")));
     }
 

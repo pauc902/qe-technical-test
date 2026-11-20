@@ -1,4 +1,4 @@
-# QE practice: Playwright Java tests for an API and a user interface
+# QE technical test: Playwright Java tests for an API and a user interface
 
 This project has automated tests for two public demo systems:
 

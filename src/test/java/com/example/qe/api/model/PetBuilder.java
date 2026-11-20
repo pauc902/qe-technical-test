@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class PetBuilder {
 
     private Long id = ThreadLocalRandom.current().nextLong(1_000_000_000L, 9_000_000_000L);
-    private String name = "qe-practice-pet-" + id;
+    private String name = "qe-test-pet-" + id;
     private String status = "available";
 
     private PetBuilder() {
