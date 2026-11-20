@@ -137,6 +137,12 @@ assistive-technology testing are also needed.
   client error, never a server error.
 - **The login fields could not be found by label** (section 5), so they are located by placeholder, and the
   finding is recorded for an accessibility scan.
+- **The UI tests could not find a browser on a new machine.** Adding Windows to the pipeline exposed it. To
+  save time, the API tests told Playwright not to download browsers, but Playwright sets itself up once per
+  test run, so when the API tests ran first, the UI tests found no browser. It had been hidden because my
+  machine already had the browsers and the Linux pipeline installed them separately. I reproduced it locally
+  with an empty browser folder, removed the optimisation, and kept the Windows run free of any separate install
+  step so that it behaves like a reviewer's first `mvn test`.
 - **Checking stability.** Before relying on the tests in a demonstration, I ran the not-found API test 10 times
   and the create-then-get test 20 times. All runs passed, so I did not add retries. This shows the tests are
   stable now; it cannot prove they will never fail on a shared public server.

@@ -24,9 +24,9 @@ public abstract class ApiTestBase {
 
     @BeforeAll
     void openConnection() {
-        // API tests never open a browser, so skip Playwright's ~500 MB browser download.
-        playwright = Playwright.create(new Playwright.CreateOptions()
-                .setEnv(Map.of("PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD", "1")));
+        // Deliberately NOT skipping the browser download here. Playwright sets itself up once per test run,
+        // so if the API tests ran first with downloads skipped, the UI tests would then find no browser.
+        playwright = Playwright.create();
         request = playwright.request().newContext(new APIRequest.NewContextOptions()
                 .setBaseURL(TestConfig.get("petstore.baseUrl"))
                 .setExtraHTTPHeaders(Map.of("Accept", "application/json")));

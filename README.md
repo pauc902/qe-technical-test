@@ -23,7 +23,7 @@ The reasoning behind the tests, and the further scenarios that would be automate
 
 Nothing else needs installing. The first time the UI tests run, Playwright downloads the browsers it
 controls (about 500 MB, once). That first run takes a few minutes. After that, the whole suite takes about
-a minute. The API tests do not use a browser and do not trigger the download.
+a minute.
 
 ## Run the tests
 
