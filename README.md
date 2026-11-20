@@ -18,7 +18,8 @@ The reasoning behind the tests, and the further scenarios that would be automate
 - **Java 17 or later.** Check with `java -version`.
 - **Maven 3.9 or later.** Maven is the tool that downloads the libraries, compiles the code and runs the
   tests. Check with `mvn -v`.
-- **An internet connection.** Both systems under test are public websites.
+- **An internet connection.** Both systems under test are public websites. On a company network, the
+  browser download may need your proxy setting (the `HTTPS_PROXY` environment variable).
 
 Nothing else needs installing. The first time the UI tests run, Playwright downloads the browsers it
 controls (about 500 MB, once). That first run takes a few minutes. After that, the whole suite takes about
@@ -41,6 +42,10 @@ mvn test -Dgroups=ui -Dui.headless=false -Dui.slowMoMs=500    # watch it slowed 
 ```
 
 "Headless" means the browser runs without a visible window.
+
+**On Windows PowerShell,** put each `-D` option in quotes, because PowerShell can split an option at its
+dots: `mvn test "-Dgroups=ui" "-Dui.headless=false"`. Plain `mvn test` needs no quotes, and the Command
+Prompt (`cmd`) needs none either. The pipeline runs the tests on both Linux and Windows.
 
 **One test is skipped on purpose.** It records a real defect in the Petstore, which is described in
 [docs/TEST_DESIGN.md](docs/TEST_DESIGN.md#5-findings). A skipped test does not fail the build.

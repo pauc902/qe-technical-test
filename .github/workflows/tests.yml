@@ -9,7 +9,15 @@ permissions:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # Run on Linux and on Windows, so a reviewer on either can expect the same result.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     steps:
       # GDS: third-party actions are pinned to a full commit ID, with the version in a comment.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -20,7 +28,11 @@ jobs:
           java-version: '17'
           cache: maven
 
+      # Linux build machines lack the system libraries a browser needs, so install them first.
+      # Windows needs nothing extra: Playwright downloads its browsers on the first UI test,
+      # which is exactly what happens when a reviewer runs `mvn test` for the first time.
       - name: Install the Playwright browser (Chromium) and its system libraries
+        if: runner.os == 'Linux'
         run: >
           mvn -B -q test-compile exec:java
           -Dexec.mainClass=com.microsoft.playwright.CLI
@@ -33,14 +45,16 @@ jobs:
       # Show the results table on the run's Summary page, even when tests fail.
       - name: Publish the results table
         if: always()
-        run: cat target/test-summary.md >> "$GITHUB_STEP_SUMMARY" || echo "No results table was produced" >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          echo "### ${{ runner.os }}" >> "$GITHUB_STEP_SUMMARY"
+          cat target/test-summary.md >> "$GITHUB_STEP_SUMMARY" || echo "No results table was produced" >> "$GITHUB_STEP_SUMMARY"
 
       # Keep the table, the JUnit XML and any failure screenshots and traces for download.
       - name: Keep the results and failure evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: test-results
+          name: test-results-${{ runner.os }}
           path: |
             target/test-summary.md
             target/surefire-reports/
